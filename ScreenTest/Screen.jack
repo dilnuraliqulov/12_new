@@ -1,3 +1,6 @@
+/**
+ * Graphic screen library.
+ */
 class Screen {
 
     static int screen, kbd;
@@ -32,20 +35,14 @@ class Screen {
     /** Draws the (x, y) pixel. */
     function void drawPixel(int x, int y) {
         var int mem, mod;
-
-        // Validate coordinates
-        if ((x < 0) | (x >= 512)) { // 0 <= x < 512
+        if ((x < 0) | ~(x < 512)) {
             do Sys.error(7);
         }
-        if ((y < 0) | (y >= 256)) { // 0 <= y < 256
+        if ((y < 0) | ~(y < 256)) {
             do Sys.error(7);
         }
-
-        // Calculate memory address and bit position
         let mem = screen + Math.multiply(y, 32) + Math.divide(x, 16);
-        let mod = x % 16;
-
-        // Draw pixel
+        let mod = x - Math.multiply(Math.divide(x, 16), 16);
         if (color) {
             do Memory.poke(mem, Memory.peek(mem) | Math.twoToThe(mod));
         } else {
@@ -56,45 +53,45 @@ class Screen {
 
     /** Draws a line from (x1, y1) to (x2, y2). */
     function void drawLine(int x1, int y1, int x2, int y2) {
-        var int dx, dy, x, y, diff, steep, yStep;
+        var int dx, dy, x, y, diff;
+        var boolean steep;
+        var int yStep;
 
-        // Validate coordinates
-        if ((x1 < 0) | (x1 >= 512) | (x2 < 0) | (x2 >= 512)) {
+        if ((x1 < 0) | ~(x1 < 512) | (x2 < 0) | ~(x2 < 512)) {
             do Sys.error(7);
         }
-        if ((y1 < 0) | (y1 >= 256) | (y2 < 0) | (y2 >= 256)) {
+        if ((y1 < 0) | ~(y1 < 256) | (y2 < 0) | ~(y2 < 256)) {
             do Sys.error(7);
         }
 
-        // Compute differences
         let dx = Math.abs(x2 - x1);
         let dy = Math.abs(y2 - y1);
         let steep = dy > dx;
 
-        // Swap coordinates if steep
         if (steep) {
-            let x1 = y1;
-            let y1 = x1;
-            let x2 = y2;
-            let y2 = x2;
+            let x1 = x1 + y1;
+            let y1 = x1 - y1;
+            let x1 = x1 - y1;
+            let x2 = x2 + y2;
+            let y2 = x2 - y2;
+            let x2 = x2 - y2;
         }
 
-        // Swap coordinates to ensure left-to-right drawing
         if (x1 > x2) {
-            let x1 = x2;
-            let x2 = x1;
-            let y1 = y2;
-            let y2 = y1;
+            let x1 = x1 + x2;
+            let x2 = x1 - x2;
+            let x1 = x1 - x2;
+            let y1 = y1 + y2;
+            let y2 = y1 - y2;
+            let y1 = y1 - y2;
         }
 
         let diff = 0;
         let x = x1;
         let y = y1;
-
+        let yStep = 1;
         if (y1 > y2) {
             let yStep = -1;
-        } else {
-            let yStep = 1;
         }
 
         while (x <= x2) {
@@ -103,10 +100,8 @@ class Screen {
             } else {
                 do Screen.drawPixel(x, y);
             }
-
             let x = x + 1;
             let diff = diff + dy;
-
             if (diff > dx) {
                 let y = y + yStep;
                 let diff = diff - dx;
@@ -120,7 +115,6 @@ class Screen {
     function void drawRectangle(int x1, int y1, int x2, int y2) {
         var int temp, y;
 
-        // Swap coordinates if necessary
         if (x1 > x2) {
             let temp = x1;
             let x1 = x2;
@@ -132,15 +126,13 @@ class Screen {
             let y2 = temp;
         }
 
-        // Validate coordinates
-        if ((x1 < 0) | (x1 >= 512) | (x2 < 0) | (x2 >= 512)) {
+        if ((x1 < 0) | ~(x1 < 512) | (x2 < 0) | ~(x2 < 512)) {
             do Sys.error(7);
         }
-        if ((y1 < 0) | (y1 >= 256) | (y2 < 0) | (y2 >= 256)) {
+        if ((y1 < 0) | ~(y1 < 256) | (y2 < 0) | ~(y2 < 256)) {
             do Sys.error(7);
         }
 
-        // Draw each horizontal line
         let y = y1;
         while (y <= y2) {
             do Screen.drawLine(x1, y, x2, y);
@@ -153,22 +145,19 @@ class Screen {
     function void drawCircle(int cx, int cy, int r) {
         var int dy, term;
 
-        // Validate coordinates and radius
-        if ((cx < 0) | (cx >= 512) | (cy < 0) | (cy >= 256)) {
+        if ((cx < 0) | ~(cx < 512) | (cy < 0) | ~(cy < 256)) {
             do Sys.error(7);
         }
         if ((r < 0) | ((cx - r) < 0) | ((cx + r) >= 512) | ((cy - r) < 0) | ((cy + r) >= 256)) {
             do Sys.error(7);
         }
 
-        // Draw circle using horizontal lines
         let dy = -r;
         while (dy <= r) {
-            let term = Math.sqrt(r * r - dy * dy);
+            let term = Math.sqrt((r * r) - (dy * dy));
             do Screen.drawLine(cx - term, cy + dy, cx + term, cy + dy);
             let dy = dy + 1;
         }
         return;
     }
 }
-//byme
