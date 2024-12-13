@@ -158,6 +158,7 @@ class Math {
          - Otherwise, return (q + q + 1) or -(q + q + 1) based on negAnswer
       */
     }
+    
     /** Returns the integer part of the square root of x. */
     function int sqrt(int x) {
       var int y, j, n;
