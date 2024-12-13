@@ -1,6 +1,7 @@
 /**
  * A basic math library.
- */
+ */ 
+ //mhngbf
 class Math {
 
     static Array twoToThe;
