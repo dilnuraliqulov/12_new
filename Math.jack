@@ -1,0 +1,238 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Math.jack
+
+/**
+ * A basic math library.
+ */
+class Math {
+
+    static Array twoToThe;
+
+    /** Initializes the library. */
+    function void init() {
+      var int i;
+
+      let twoToThe = Array.new(16);
+      let twoToThe[0] = 1;
+
+      let i = 1;
+      while(i < 16) {
+        let twoToThe[i] = twoToThe[i-1] + twoToThe[i-1];
+        let i = i + 1;
+      }
+      return;
+    }
+
+    function boolean bit(int x, int j) {
+      var int bitTest;
+      if(j = 15) {
+        if(x < 0) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+      let bitTest = (x & twoToThe[j]);
+      if(bitTest = 0) {
+        return false;
+      } else {
+        return true;
+      }
+    }
+
+    /** Returns the absolute value of x. */
+    function int abs(int x) {
+      if(x < 0) {
+        return -x;
+      } else {
+        return x;
+      }
+    }
+
+    /** Returns the product of x and y. */
+    function int multiply(int x, int y) {
+      var boolean negAnswer;
+    var int result, shiftedX;
+    var int j;
+    if (x = 0 || y = 0) { return 0; }
+    if (x = 1) { return y; }
+    if (x = -1) { return -y; }
+    if (y = 1) { return x; }
+    if (y = -1) { return -x; }
+    let negAnswer = ((x < 0) && (y > 0)) || ((x > 0) && (y < 0));
+    let x = Math.abs(x);
+    let y = Math.abs(y);
+    let result = 0;
+    let shiftedX = x;
+    let j = 0;
+    while (j < 16) {
+        if (Math.bit(y, j)) {
+            let result = result + shiftedX;
+        }
+        let shiftedX = shiftedX + shiftedX;
+        let j = j + 1;
+    }
+    if (negAnswer) {
+        return -result;
+    } else {
+        return result;
+    }
+      // TODO: Implement the multiply function
+      /*
+      Pseudocode:
+      1. Initialize variables:
+         - negAnswer (boolean) to determine if the result should be negative
+         - result (int) to store the multiplication result
+         - shiftedX (int) to store the shifted value of x
+         - j (int) as a loop counter
+      2. Handle special cases:
+         - If x or y is 0, return 0
+         - If x is 1, return y
+         - If x is -1, return -y
+         - If y is 1, return x
+         - If y is -1, return -x
+      3. Determine the sign of the result:
+         - If x and y have opposite signs, set negAnswer to true
+         - Otherwise, set negAnswer to false
+      4. Take the absolute values of x and y
+      5. Initialize result to 0, shiftedX to x, and j to 0
+      6. Loop through 16 bits:
+         - If the j-th bit of y is set, add shiftedX to result
+         - Double shiftedX
+         - Increment j
+      7. If negAnswer is true, return -result
+         - Otherwise, return result
+      */
+    }
+
+    /** Returns the integer part of x/y. */
+    function int divide(int x, int y) {
+       var boolean negAnswer;
+    var int q;
+    if (y = 0) { do Sys.error(3); return 0; }
+    if (x = 0) { return 0; }
+    if (y = 1) { return x; }
+    if (y = -1) { return -x; }
+    let negAnswer = ((x < 0) && (y > 0)) || ((x > 0) && (y < 0));
+    let x = Math.abs(x);
+    let y = Math.abs(y);
+    if (y > x) { return 0; }
+    if (y + y < 0) { return 1; }
+    let q = divide(x, y + y);
+    if ((x - (2 * q * y)) < y) {
+        if (negAnswer) {
+            return -(q + q);
+        } else {
+            return (q + q);
+        }
+    } else {
+        if (negAnswer) {
+            return -(q + q + 1);
+        } else {
+            return (q + q + 1);
+        }
+    }
+      // TODO: Implement the divide function
+      /*
+      Pseudocode:
+      1. Initialize variables:
+         - negAnswer (boolean) to determine if the result should be negative
+         - q (int) to store the quotient
+      2. Handle special cases:
+         - If y is 0, call Sys.error(3)
+         - If x is 0, return 0
+         - If y is 1, return x
+         - If y is -1, return -x
+      3. Determine the sign of the result:
+         - If x and y have opposite signs, set negAnswer to true
+         - Otherwise, set negAnswer to false
+      4. Take the absolute values of x and y
+      5. Handle cases where y is greater than x:
+         - If y > x, return 0
+         - If y + y < 0, return 1
+      6. Calculate the quotient:
+         - Set q to the result of dividing x by (y + y)
+         - If (x - (2 * q * y)) < y, return (q + q) or -(q + q) based on negAnswer
+         - Otherwise, return (q + q + 1) or -(q + q + 1) based on negAnswer
+      */
+    }
+    /** Returns the integer part of the square root of x. */
+    function int sqrt(int x) {
+      var int y, j, n;
+    var boolean loop;
+    var int term;
+    if (x < 0) { do Sys.error(4); return 0; }
+    if (x = 0) { return 0; }
+    let y = 0;
+    let n = 0;
+    let loop = true;
+    while (loop) {
+        if (x >= twoToThe[n]) {
+            let n = n + 1;
+        } else {
+            let loop = false;
+        }
+
+        if (n > 15) {
+            let loop = false;
+        }
+    }
+    let j = (n / 2) - 1;
+    while (j > -1) {
+        let term = (y + twoToThe[j]) * (y + twoToThe[j]);
+        if ((term <= x) && (term > 0)) {
+            let y = y + twoToThe[j];
+        }
+        let j = j - 1;
+    }
+    return y;
+      // TODO: Implement the sqrt function
+      /*
+      Pseudocode:
+      1. Initialize variables:
+         - loop (boolean) to control the outer loop
+         - y (int) to store the current approximation of the square root
+         - j (int) as a loop counter
+         - n (int) to store the number of bits needed to represent x
+         - term (int) to store intermediate multiplication results
+      2. Handle special cases:
+         - If x is negative, call Sys.error(4)
+         - If x is 0, return 0
+      3. Determine the number of bits needed to represent x:
+         - Initialize y and n to 0, and loop to true
+         - Loop while loop is true:
+           - If x is greater than or equal to twoToThe[n], increment n
+           - Otherwise, set loop to false
+           - If n exceeds 15, set loop to false
+      4. Calculate the initial approximation of the square root:
+         - Set j to the integer division of n by 2, minus 1
+      5. Refine the approximation:
+         - Loop while j is greater than or equal to 0:
+           - Calculate term as the square of (y + twoToThe[j])
+           - If term is less than or equal to x and term is positive, add twoToThe[j] to y
+           - Decrement j
+      6. Return the final approximation y
+      */
+
+    }
+
+    /** Returns the greater number. */
+    function int max(int a, int b) {
+      if(a > b) {
+        return a;
+      } else {
+        return b;
+      }
+    }
+
+    /** Returns the smaller number. */
+    function int min(int a, int b) {
+      if(a < b) {
+        return a;
+      } else {
+        return b;
+      }
+    }
+}

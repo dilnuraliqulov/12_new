@@ -1,0 +1,115 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Memory.jack
+
+/**
+ * Memory operations library.
+ */
+ class Memory{
+
+	static Array RAM;
+	static Array HEAP;
+	
+	function void init(){
+		let RAM = 0;
+		let HEAP = 2048;
+		let HEAP[0] = -1; // No more free segments next, null pointer
+		let HEAP[1] = 16384 - 2048 - 2; // Initial free size
+		return;
+	}
+
+	function int peek(int address){
+		return RAM[address];
+	}
+	
+	function void poke(int address, int value){
+		let RAM[address] = value;
+		return;
+	}
+	
+
+  // Allocates a block of memory of the given size and returns a reference to it.
+	function Array alloc(int size){
+		 var Array current, selected, block;
+    var int currentSize, selectedSize;
+    if (size < 0) {
+        do Sys.error(5);
+        return 0;
+    }
+    let current = HEAP;
+    let selected = -1;
+    let selectedSize = HEAP[1] + 1;  // Initial size of free space
+    while (current > -1) {
+        let currentSize = current[1];
+        if (currentSize >= size + 2) {
+		  if (currentSize < selectedSize) {
+             let selected = current;
+             let selectedSize = currentSize;
+            }
+        }
+        let current = current[0];
+    }
+    if (selected = -1) {
+        do Sys.error(6);
+        return 0;
+    }
+    let selected[1] = selected[1] - size - 2;  
+    let block = selected + selected[1] + 1;    
+    let block[0] = -1;                        
+    let block[1] = size;                      
+    return block + 2;
+		// TODO: Implement memory allocation logic
+		/*
+		Pseudocode:
+		If size < 0:
+			call Sys.error(5)
+		Initialize variables:
+			current, selected, block as Array
+			currentSize, selectedSize as int
+		Set current = HEAP
+		Set selected = -1
+		Set selectedSize = HEAP[1] + 1
+		While current > -1:
+			If currentSize >= size + 2:
+				If currentSize < selectedSize:
+					Set selected = current
+					Set selectedSize = currentSize
+			Set current = current[0]
+			Set currentSize = current[1]
+		If selected = -1:
+			call Sys.error(6)
+		Carve out the block:
+			Set selected[1] = selected[1] - size - 2
+			Set block = selected + selected[1] + 1
+			Set block[0] = -1
+			Set block[1] = size
+		Return block + 2
+		*/
+	}
+	
+  // De-allocates the given block of memory.
+	function void deAlloc(Array array){
+		var Array current, block;
+    let block = array - 2;
+    let current = HEAP;
+    while (current[0] > 0) {
+        let current = current[0];
+    }
+    let current[0] = block;
+    return;
+		// TODO: Implement memory deallocation logic
+		/*
+		Pseudocode:
+		Initialize variables:
+			current, block as Array
+		Set block = array - 2
+		Set current = HEAP
+		Find the last block in the free list:
+			While current[0] > 0:
+				Set current = current[0]
+		Set current[0] = block
+		Return
+		*/
+	}
+}

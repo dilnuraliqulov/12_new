@@ -1,0 +1,202 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Screen.jack
+
+/**
+ * Graphic screen library.
+ */
+class Screen {
+
+    static int screen, kbd;
+    static boolean color;
+
+    /** Initializes the Screen. */
+    function void init() {
+      let screen = 16384;
+      let kbd = 24576;
+      let color = true;
+      return;
+    }
+
+    /** Erases the whole screen. */
+    function void clearScreen() {
+      var int i;
+      let i = screen;
+      while(i < kbd) {
+        do Memory.poke(i, 0);
+        let i = i + 1;
+      }
+      return;
+     }
+
+    /** Sets the color to be used in further draw commands
+     *  where white = false, black = true. */
+    function void setColor(boolean b) {
+      let color = b;
+      return;
+    }
+
+    /** Draws the (x, y) pixel. */
+    function void drawPixel(int x, int y) {
+      var int mem, mod;
+      if((x < 0) | ~(x < 512)) {  // check for illegal x coordinate
+        do Sys.error(7);
+      }
+      if((y < 0) | ~(y < 256)) {  // check for illegal y coordinate
+        do Sys.error(7);
+      }
+      let mem = screen + Math.multiply(y, 32) + Math.divide(x, 16);
+      let mod = Math.divide(x, 16);
+      let mod = x - Math.multiply(mod, 16);
+      
+      if(color) {
+        do Memory.poke(mem, (Memory.peek(mem) | Math.twoToThe(mod)));
+      } else {
+        do Memory.poke(mem, (Memory.peek(mem) & ~Math.twoToThe(mod)));
+      }
+      
+      return;
+    }
+
+    /** Draws a line from (x1, y1) to (x2, y2). */
+    function void drawLine(int x1, int y1, int x2, int y2) {
+       var int dx, dy, x, y, diff;
+        var int steep;
+        if((x1 < 0) | (x1 > 511) | (x2 < 0) | (x2 > 511)) {
+            do Sys.error(7);
+        }
+        if((y1 < 0) | (y1 > 255) | (y2 < 0) | (y2 > 255)) {
+            do Sys.error(7);
+        }
+        let dx = Math.abs(x2 - x1);
+        let dy = Math.abs(y2 - y1);
+        let steep = dy > dx;
+        if (steep) {
+            let x1 = x1 + y1;
+            let y1 = x1 - y1;
+            let x1 = x1 - y1;
+            let x2 = x2 + y2;
+            let y2 = x2 - y2;
+            let x2 = x2 - y2;
+            let dx = Math.abs(x2 - x1);
+            let dy = Math.abs(y2 - y1);
+        }
+        if (x1 > x2) {
+            let x1 = x1 + x2;
+            let x2 = x1 - x2;
+            let x1 = x1 - x2;
+            let y1 = y1 + y2;
+            let y2 = y1 - y2;
+            let y1 = y1 - y2;
+        }
+        let x = x1;
+        let y = y1;
+        let diff = 0;
+        var int yStep;
+        let yStep = 1;
+        if (y1 > y2) {
+            let yStep = -1;
+        }
+        while (x < x2) {
+            if (steep) {
+                do Screen.drawPixel(y, x);
+            } else {
+                do Screen.drawPixel(x, y);
+            }
+            let x = x + 1;
+            let diff = diff + dy;
+            if (diff > dx) {
+                let y = y + yStep;
+                let diff = diff - dx;
+            }
+        }
+        return;
+      // TODO: Implement the drawLine function using Bresenham's line algorithm
+
+      /*
+       * Pseudocode:
+       * 1. Calculate dx and dy.
+       * 2. Determine the direction of the line (steep or shallow).
+       * 3. Initialize the error term.
+       * 4. Loop through the points from (x1, y1) to (x2, y2):
+       *    a. Draw the current pixel.
+       *    b. Update the error term.
+       *    c. Adjust the coordinates based on the error term.
+       */
+    }
+
+    /** Draws a filled rectangle where the top left corner
+     *  is (x1, y1) and the bottom right corner is (x2, y2). */
+    function void drawRectangle(int x1, int y1, int x2, int y2) {
+      var int temp, y;
+        if (x1 > x2) {
+            let temp = x1;
+            let x1 = x2;
+            let x2 = temp;
+        }
+        if (y1 > y2) {
+            let temp = y1;
+            let y1 = y2;
+            let y2 = temp;
+        }
+        if((x1 < 0) | (x1 > 511) | (x2 < 0) | (x2 > 511)) {
+            do Sys.error(7);
+        }
+        if((y1 < 0) | (y1 > 255) | (y2 < 0) | (y2 > 255)) {
+            do Sys.error(7);
+        }
+        let y = y1;
+        while (y < (y2 + 1)) {
+            do Screen.drawLine(x1, y, x2, y);
+            let y = y + 1;
+        }
+        
+        return;
+      // TODO: Implement the drawRectangle function
+
+      /*
+       * Pseudocode:
+       * 1. Ensure (x1, y1) is the top left and (x2, y2) is the bottom right.
+       * 2. Check for illegal coordinates:
+       *    a. x1, x2 should be within the screen width (0 to 511).
+       *    b. y1, y2 should be within the screen height (0 to 255).
+       * 3. Loop through each y coordinate from y1 to y2:
+       *    a. Draw a horizontal line from (x1, y) to (x2, y).
+       * 4. Draw the final horizontal line at y2.
+       */
+    }
+
+    /** Draws a filled circle of radius r around (cx, cy). */
+    function void drawCircle(int cx, int cy, int r) {
+       var int dy, term;
+        if ((cx < 0) | (cx > 511) | (cy < 0) | (cy > 255)) {
+            do Sys.error(7);
+        }
+        if ((r < 0)|((cx - r) < 0) | ((cx + r) > 511) | 
+            ((cy - r) < 0) | ((cy + r) > 255)) {
+            do Sys.error(7);
+        }
+        let dy=-r;
+        while (dy < (r + 1)) {
+            let term = Math.sqrt((r * r) - (dy * dy));
+            do Screen.drawLine(cx - term, cy + dy, cx + term, cy + dy);
+            let dy = dy + 1;
+        }
+        return;
+      // TODO: Implement the drawCircle function
+
+      /*
+       * Pseudocode:
+       * 1. Check for illegal coordinates and radius:
+       *    a. cx should be within the screen width (0 to 511).
+       *    b. cy should be within the screen height (0 to 255).
+       *    c. Ensure the circle fits within the screen boundaries.
+       * 2. Initialize dy to -r.
+       * 3. Loop through each y coordinate from (cy - r) to (cy + r):
+       *    a. Calculate the horizontal distance (term) using the circle equation.
+       *    b. Draw a horizontal line from (cx - term, cy + dy) to (cx + term, cy + dy).
+       *    c. Increment dy.
+       */
+    }
+}
